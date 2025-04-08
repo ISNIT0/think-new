@@ -26,7 +26,7 @@ export default function AgentChat() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const messageContainerRef = useRef<HTMLDivElement>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [, setMessages] = useState<Message[]>([]);
     const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
     const lastMessageRef = useRef<string | null>(null);
 
