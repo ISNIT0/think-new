@@ -212,6 +212,7 @@ export class Think {
 
         this.id = response.data.agentId;
       } catch (error) {
+        console.error('Error creating agent:', (error as any).response.data);
         if (error instanceof ThinkValidationError) {
           throw error;
         }

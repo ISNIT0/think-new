@@ -47,11 +47,7 @@ export type SCPTool = z.infer<typeof scpToolSchema>;
 const createAgentSchema = z.object({
     name: z.string(),
     systemPrompt: z.string().optional(),
-    tools: z.array(z.object({
-        url: z.string().url(),
-        title: z.string(),
-        description: z.string().optional(),
-    }))
+    tools: z.array(z.string())
 });
 
 const app = express();
@@ -91,11 +87,7 @@ async function validateSCPEndpoint(url: string): Promise<SCPTool | null> {
 router.post('/agents', (async (req: Request<{}, {}, {
     name: string;
     systemPrompt?: string;
-    tools: Array<{
-        url: string;
-        title: string;
-        description?: string;
-    }>;
+    tools: string[];
 }>, res: Response) => {
     try {
         // Validate request body
@@ -114,12 +106,12 @@ router.post('/agents', (async (req: Request<{}, {}, {
         // Validate each tool's SCP endpoint
         const validatedTools = [];
         for (const tool of tools) {
-            const validatedTool = await validateSCPEndpoint(tool.url);
+            const validatedTool = await validateSCPEndpoint(tool);
             if (!validatedTool) {
                 return res.status(400).json({
                     title: 'Invalid SCP Endpoint',
                     status: 400,
-                    detail: `Invalid or incompatible SCP endpoint: ${tool.url}`,
+                    detail: `Invalid or incompatible SCP endpoint: ${tool}`,
                 });
             }
             // Convert validated tool to ISCPToolDefinition format
