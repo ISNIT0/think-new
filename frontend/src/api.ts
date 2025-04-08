@@ -1,4 +1,4 @@
-export const API_BASE = process.env.VITE_API_BASE || 'http://localhost:1234/api';
+export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:1234/api';
 
 export interface ToolCall {
     id: string;
