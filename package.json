@@ -1,0 +1,36 @@
+{
+  "name": "think-new",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "redis:start": "docker run -p 6379:6379 -d redis/redis-stack-server:latest",
+    "redis:stop": "docker stop $(docker ps -q --filter ancestor=redis/redis-stack-server:latest)",
+    "redis": "docker restart $(docker ps -q --filter ancestor=redis/redis-stack-server:latest)"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.7.0",
+  "dependencies": {
+    "@types/body-parser": "^1.19.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
+    "axios": "^1.8.4",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "morgan": "^1.10.0",
+    "openai": "^4.92.1",
+    "redis": "^4.7.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  }
+}
