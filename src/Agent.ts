@@ -1,17 +1,11 @@
 import type OpenAI from "openai";
 import axios from "axios";
 import { JSONSchema } from "openai/lib/jsonschema";
+import { SCPTool } from ".";
 
 export interface IToolExecutor {
     execute: (args: any) => Promise<string>;
 }
-
-export type ISCPToolDefinition = JSONSchema & {
-    url: string;
-    title: string;
-    description: string;
-    properties: JSONSchema;
-};
 
 export type IChatMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam & {
     id: string;
@@ -26,7 +20,7 @@ export type AgentEventHandler = (agent: Agent, message: IChatMessage) => void;
 export interface ISerialisedAgent {
     id: string;
     name: string;
-    tools: ISCPToolDefinition[];
+    tools: SCPTool[];
     messages: IChatMessage[];
     systemPrompt?: string;
 }
@@ -34,7 +28,7 @@ export interface ISerialisedAgent {
 export class Agent {
     id: string;
     name: string;
-    tools: ISCPToolDefinition[];
+    tools: SCPTool[];
     messages: IChatMessage[];
     systemPrompt?: string;
     private openaiClient: OpenAI;

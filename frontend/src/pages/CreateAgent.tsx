@@ -10,6 +10,14 @@ interface RecentAgent {
     timestamp: number;
 }
 
+interface ProblemDetails {
+    type?: string;
+    title: string;
+    status: number;
+    detail: string;
+    validation_errors?: any[];
+}
+
 export default function CreateAgent() {
     const navigate = useNavigate();
     const [name, setName] = useState('');
@@ -19,6 +27,7 @@ export default function CreateAgent() {
     const [scpUrl, setScpUrl] = useState('');
     const [validating, setValidating] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const stored = localStorage.getItem('recentAgents');
@@ -29,11 +38,20 @@ export default function CreateAgent() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
         try {
+            // Format tools to match backend schema
+            const formattedTools = selectedTools.map(tool => ({
+                url: tool.url,
+                title: tool.title,
+                description: tool.description
+            }));
+
             const { agentId } = await api.createAgent({
                 name,
                 systemPrompt,
-                tools: selectedTools
+                tools: formattedTools
             });
 
             // Add to recent agents
@@ -43,8 +61,20 @@ export default function CreateAgent() {
 
             // Navigate to chat
             navigate(`/agent/${agentId}`);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create agent:', error);
+
+            // Handle RFC 7807 Problem Details format
+            if (error.response?.data) {
+                const problem: ProblemDetails = error.response.data;
+                if (problem.validation_errors) {
+                    setError(`Validation error: ${problem.detail}`);
+                } else {
+                    setError(problem.detail || problem.title);
+                }
+            } else {
+                setError(error.message || 'Failed to create agent');
+            }
         }
     };
 
@@ -70,7 +100,14 @@ export default function CreateAgent() {
             const result = await validateSCPEndpoint(url);
 
             if (result.isValid && result.discovery) {
-                setSelectedTools(prev => [...prev, result.discovery] as SCPTool[]);
+                const discovery = result.discovery as SCPTool;
+                setSelectedTools(prev => {
+                    // toggle
+                    if (prev.some(t => t.url === discovery.url)) {
+                        return prev.filter(t => t.url !== discovery.url);
+                    }
+                    return [...prev, discovery];
+                });
                 setScpUrl('');
             } else {
                 setValidationError(result.error?.message || 'Invalid SCP endpoint');
@@ -98,6 +135,11 @@ export default function CreateAgent() {
 
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 transform transition-all duration-200 hover:shadow-2xl">
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                                {error}
+                            </div>
+                        )}
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                                 Agent Name
@@ -222,7 +264,8 @@ export default function CreateAgent() {
 
                         <button
                             type="submit"
-                            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:shadow-lg"
+                            disabled={!name || selectedTools.length === 0}
+                            className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

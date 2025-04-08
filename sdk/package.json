@@ -1,0 +1,54 @@
+{
+  "name": "@think-new/sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for the Think Agent API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "test": "jest",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "think",
+    "ai",
+    "agent",
+    "sdk",
+    "typescript"
+  ],
+  "author": "Think New",
+  "license": "MIT",
+  "packageManager": "pnpm@10.7.0",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.28",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/think-new/sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/think-new/sdk/issues"
+  },
+  "homepage": "https://github.com/think-new/sdk#readme"
+}

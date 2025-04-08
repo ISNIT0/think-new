@@ -9,10 +9,10 @@ class Redis {
     constructor(url: string) {
         this.redisClient = createClient({
             url: url,
-            socket: {
+            socket: process.env.NODE_ENV === 'production' ? {
                 tls: true,
                 rejectUnauthorized: false,
-            }
+            } : undefined,
         })
             .on('error', err => console.log('Redis Client Error', err))
             .connect();

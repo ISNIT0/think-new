@@ -56,7 +56,7 @@ export const api = {
             throw new Error('Failed to create agent');
         }
 
-        return response.json();
+        return response.json().then(r => r.result);
     },
 
     async getAgent(agentId: string): Promise<Agent> {
