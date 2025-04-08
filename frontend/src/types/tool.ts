@@ -1,3 +1,4 @@
+import { API_BASE } from "../api";
 
 export interface Tool {
     title: string;
@@ -10,12 +11,12 @@ export const SAMPLE_TOOLS: Tool[] = [
     {
         title: 'Get Time',
         description: 'Get the current time in UTC format',
-        url: new URL(`/scp/time`, 'http://localhost:1234').toString(),
+        url: new URL(`/scp/time`, API_BASE).toString(),
     },
     {
         title: 'Add Numbers',
         description: 'Add two numbers together',
-        url: new URL(`/scp/add`, 'http://localhost:1234').toString(),
+        url: new URL(`/scp/add`, API_BASE).toString(),
     }
     // {
     //     id: 'web-search',
