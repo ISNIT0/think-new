@@ -86,8 +86,9 @@ export interface Message {
 
 export interface CreateAgentResponse {
   status: string;
-  agentId: string;
-
+  result: {
+    agentId: string;
+  };
 }
 
 export class Think {
@@ -210,7 +211,7 @@ export class Think {
           messages: []
         });
 
-        this.id = response.data.agentId;
+        this.id = response.data.result.agentId;
       } catch (error) {
         console.error('Error creating agent:', (error as any).response.data);
         if (error instanceof ThinkValidationError) {

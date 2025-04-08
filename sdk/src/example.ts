@@ -1,15 +1,16 @@
 import { Think } from ".";
 
-const agent = new Think("Simple Add Agent", {
-    systemPrompt: "A simple agent that adds two numbers",
+const agent = new Think("Simple Time Agent", {
+    systemPrompt: "You help the user",
     tools: [
-        'https://api.think.new/scp/add',
+        'https://api.think.new/scp/time',
     ],
+    baseUrl: 'http://localhost:1234/api'
 });
 
 
 async function run() {
-    await agent.sendMessage("Add 5 and 2");
+    await agent.sendMessage("What is the time?");
     const messages = await agent.getMessages();
     console.log(messages);
 }
