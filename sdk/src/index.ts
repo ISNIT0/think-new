@@ -310,4 +310,9 @@ export class Think {
       throw new ThinkError(error instanceof Error ? error.message : 'Unknown error');
     }
   }
+
+  public async getAgentUI(): Promise<string> {
+    const id = await this.ensureAgent();
+    return `https://think.new/agent/${id}`;
+  }
 }

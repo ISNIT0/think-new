@@ -1,15 +1,13 @@
 import { Think } from ".";
 
-const agent = new Think("Simple Time Agent", {
-    systemPrompt: "You help the user",
-    tools: [
-        'https://api.think.new/scp/time',
-    ],
-    baseUrl: 'http://localhost:1234/api'
-});
-
-
 async function run() {
+    const agent = new Think("Simple Time Agent", {
+        systemPrompt: "You help the user with whatever they need",
+        tools: [
+            'https://api.think.new/scp/time',
+        ],
+    });
+    console.log(`View agent at:\n> ${await agent.getAgentUI()}`);
     await agent.sendMessage("What is the time?");
     const messages = await agent.getMessages();
     console.log(messages);
@@ -20,3 +18,4 @@ run().then(() => {
 }).catch((e) => {
     console.error(e)
 })
+
