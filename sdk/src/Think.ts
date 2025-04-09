@@ -5,7 +5,7 @@ import * as z from 'zod';
 
 const DEFAULT_API_URL = 'https://api.think.new/api';
 
-const scpToolSchema = z.object({
+export const scpToolSchema = z.object({
     scpVersion: z.literal('1.0.0'),
     endpointVersion: z.string().optional(),
     $schema: z.string().optional(),
@@ -30,12 +30,20 @@ const scpToolSchema = z.object({
     }).optional(),
 });
 
+export type SCPTool = z.infer<typeof scpToolSchema>;
+
+export interface SimpleSCPTool {
+    url: string;
+    title: string;
+    description?: string;
+}
+
 export class Think {
     private readonly api: AxiosInstance;
     private readonly _name: string;
     private id: string | null = null;
 
-    constructor(name: string, private options: ThinkOptions = {}) {
+    constructor(name: string, private options: ThinkOptions) {
         this._name = name;
         this.api = axios.create({
             baseURL: options.baseUrl || DEFAULT_API_URL
@@ -82,19 +90,27 @@ export class Think {
     }
 
     /**
-     * Validate an SCP endpoint
+     * Validate an SCP endpoint and return the tool definition
      * @throws {ThinkValidationError} When validation fails
      * @throws {ThinkAPIError} When API request fails
+     * @returns The validated SCP tool definition
      */
-    public async validateTool(url: string): Promise<void> {
+    public static async validateTool(url: string): Promise<SimpleSCPTool> {
         try {
             const response = await axios.get(url);
             const data = response.data;
-            
+
             const result = scpToolSchema.safeParse(data);
             if (!result.success) {
                 throw new ThinkValidationError('Invalid SCP schema', result.error.errors);
             }
+
+            // Return a simplified version of the tool
+            return {
+                url: result.data.url,
+                title: result.data.title,
+                description: result.data.description
+            };
         } catch (error) {
             if (error instanceof ThinkValidationError) {
                 throw error;

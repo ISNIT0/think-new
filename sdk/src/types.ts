@@ -1,6 +1,6 @@
 export interface ThinkOptions {
-  tools?: string[]; // Array of SCP URLs
-  systemPrompt?: string;
+  tools: string[]; // Array of SCP URLs
+  systemPrompt: string;
   baseUrl?: string;
 }
 
