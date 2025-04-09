@@ -47,7 +47,8 @@ export type SCPTool = z.infer<typeof scpToolSchema>;
 const createAgentSchema = z.object({
     name: z.string(),
     systemPrompt: z.string().optional(),
-    tools: z.array(z.string())
+    tools: z.array(z.string()),
+    openaiApiKey: z.string().optional()
 });
 
 const app = express();
@@ -124,7 +125,8 @@ router.post('/agents', (async (req: Request<{}, {}, {
             name,
             systemPrompt,
             tools: validatedTools,
-            messages: []
+            messages: [],
+            openaiApiKey: parseResult.data.openaiApiKey
         };
 
         // Store in Redis
@@ -176,7 +178,8 @@ router.post('/agents/:agentId', (async (req: Request, res: Response) => {
                         name: agent.name,
                         tools: agent.tools,
                         messages: agent.messages,
-                        systemPrompt: agent.systemPrompt
+                        systemPrompt: agent.systemPrompt,
+                        openaiApiKey: agent.openaiApiKey
                     })
                 );
             }
@@ -202,6 +205,9 @@ router.get('/agents/:agentId', (async (req: Request, res: Response) => {
         }
 
         const serialisedAgent: ISerialisedAgent = JSON.parse(agentData);
+        if (serialisedAgent.openaiApiKey) {
+            serialisedAgent.openaiApiKey = 'CUSTOM';
+        }
         res.json(serialisedAgent);
     } catch (error: any) {
         res.status(500).json({ error: error.message });

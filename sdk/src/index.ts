@@ -1,8 +1,7 @@
-
 // Export all types and classes
 export { Think } from './Think';
 export { ThinkError, ThinkAPIError, ThinkNotFoundError, ThinkValidationError } from './errors';
-export type { Message, ToolCall, ThinkOptions, CreateAgentResponse } from './types';
+export type { Message, ThinkOptions, CreateAgentResponse } from './types';
 
 // Re-export everything from the current file
 export * from './Think';

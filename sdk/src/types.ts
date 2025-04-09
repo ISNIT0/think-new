@@ -1,7 +1,10 @@
+import OpenAI from 'openai';
+
 export interface ThinkOptions {
   tools: string[]; // Array of SCP URLs
-  systemPrompt: string;
+  systemPrompt?: string;
   baseUrl?: string;
+  openaiApiKey?: string;
 }
 
 export interface ToolCall {

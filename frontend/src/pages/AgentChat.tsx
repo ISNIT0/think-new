@@ -23,6 +23,12 @@ interface ToolData {
     result?: string;
 }
 
+interface AgentConfig {
+    systemPrompt: string;
+    tools: string[];
+    openaiApiKey?: string;
+}
+
 interface AgentChatProps {
     agentId?: string;
     onClose?: () => void;
@@ -38,6 +44,7 @@ export default function AgentChat({ agentId, onClose }: AgentChatProps) {
     const [isInitializing, setIsInitializing] = useState(false);
     const [systemPrompt, setSystemPrompt] = useState('');
     const [tools, setTools] = useState<string[]>([]);
+    const [openaiApiKey, setOpenaiApiKey] = useState<string | undefined>();
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Initialize agent if ID is provided
@@ -120,9 +127,10 @@ export default function AgentChat({ agentId, onClose }: AgentChatProps) {
         }
     };
 
-    const handleConfigChange = (config: { systemPrompt: string; tools: string[] }) => {
+    const handleConfigChange = (config: { systemPrompt: string; tools: string[]; openaiApiKey?: string }) => {
         setSystemPrompt(config.systemPrompt);
         setTools(config.tools);
+        setOpenaiApiKey(config.openaiApiKey);
     };
 
     const createAndSendMessage = async (message: string) => {
@@ -131,7 +139,8 @@ export default function AgentChat({ agentId, onClose }: AgentChatProps) {
             // Create a new agent with the current configuration
             const agent = new Think("New Think", { 
                 systemPrompt, 
-                tools, 
+                tools,
+                openaiApiKey,
                 baseUrl: import.meta.env.VITE_API_URL 
             });
             const agentId = await agent.create();
@@ -247,6 +256,7 @@ export default function AgentChat({ agentId, onClose }: AgentChatProps) {
                     onNewChat={handleNewChat}
                     onSelectAgent={handleSelectAgent}
                     currentAgentId={thinkAgent?.agentId ?? null}
+                    agentConfig={thinkAgent ? { systemPrompt, tools, openaiApiKey } : undefined}
                 />
 
                 <MessageContainer

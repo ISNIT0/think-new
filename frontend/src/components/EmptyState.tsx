@@ -4,13 +4,14 @@ import { SAMPLE_TOOLS } from '../types/tool';
 
 interface EmptyStateProps {
   agentName: string;
-  onConfigChange: (config: { systemPrompt: string; tools: string[] }) => void;
+  onConfigChange: (config: { systemPrompt: string; tools: string[]; openaiApiKey?: string }) => void;
 }
 
 export default function EmptyState({ agentName, onConfigChange }: EmptyStateProps) {
   const [systemPrompt, setSystemPrompt] = useState('');
   const [selectedTools, setSelectedTools] = useState<SimpleSCPTool[]>([]);
   const [scpUrl, setScpUrl] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
   const [validating, setValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
@@ -23,7 +24,8 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
         : [...prev, tool];
       onConfigChange({ 
         systemPrompt, 
-        tools: newTools.map(t => t.url)
+        tools: newTools.map(t => t.url),
+        openaiApiKey: openaiApiKey || undefined
       });
       return newTools;
     });
@@ -33,7 +35,17 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
     setSystemPrompt(prompt);
     onConfigChange({ 
       systemPrompt: prompt, 
-      tools: selectedTools.map(t => t.url)
+      tools: selectedTools.map(t => t.url),
+      openaiApiKey: openaiApiKey || undefined
+    });
+  };
+
+  const handleApiKeyChange = (key: string) => {
+    setOpenaiApiKey(key);
+    onConfigChange({
+      systemPrompt,
+      tools: selectedTools.map(t => t.url),
+      openaiApiKey: key || undefined
     });
   };
 
@@ -62,7 +74,7 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       </div>
-      <div className="text-xl font-medium text-gray-800 mb-2">Start your conversation</div>
+      <div className="text-xl font-medium text-gray-800 mb-2">Start your Think</div>
       
       <button
         onClick={() => setShowConfig(!showConfig)}
@@ -91,6 +103,23 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
           </div>
 
           <div>
+            <label htmlFor="openaiApiKey" className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              OpenAI API Key (Optional)
+            </label>
+            <input
+              type="password"
+              id="openaiApiKey"
+              value={openaiApiKey}
+              onChange={(e) => handleApiKeyChange(e.target.value)}
+              className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all px-4 py-2 bg-gray-50 hover:bg-white focus:bg-white text-sm"
+              placeholder="sk-..."
+            />
+            <p className="mt-1 text-xs text-gray-500 text-left">
+              If provided, this key will be used instead of the default API key
+            </p>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
               Tools
             </label>
@@ -115,8 +144,19 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
 
             {/* Custom SCP Tool Input */}
             <div className="mt-4">
-              <label htmlFor="scpUrl" className="block text-sm font-medium text-gray-700 mb-2 text-left">
+              <label htmlFor="scpUrl" className="block text-sm font-medium text-gray-700 mb-2 text-left flex items-center gap-2">
                 Add SCP Endpoint
+                <a 
+                  href="https://structuredcompletionprotocol.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  title="What is SCP?"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </a>
               </label>
               <div className="flex gap-2">
                 <input
@@ -145,7 +185,7 @@ export default function EmptyState({ agentName, onConfigChange }: EmptyStateProp
 
             {/* Selected Tools List */}
             {selectedTools.length > 0 && (
-              <div className="mt-4 space-y-2">
+              <div className="mt-4 space-y-2 text-left">
                 {selectedTools.map((tool) => (
                   <div
                     key={tool.url}

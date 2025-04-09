@@ -65,6 +65,7 @@ export class Think {
                 name: this._name,
                 systemPrompt: this.options.systemPrompt,
                 tools: this.options.tools,
+                openaiApiKey: this.options.openaiApiKey,
                 messages: []
             });
 
@@ -139,13 +140,14 @@ export class Think {
         try {
             // Fetch the existing agent's data
             const response = await api.get(`/agents/${id}`);
-            const { name, tools, systemPrompt, messages } = response.data;
+            const { name, tools, systemPrompt, messages, openaiApiKey } = response.data;
 
             // Create a new instance with the existing data
             const agent = new Think(name, {
                 ...options,
                 tools,
-                systemPrompt
+                systemPrompt,
+                openaiApiKey
             });
             agent.id = id; // Set the ID immediately since we know it
             return agent;

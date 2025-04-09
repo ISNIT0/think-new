@@ -87,9 +87,7 @@ export default function CreateAgent() {
         setValidationError(null);
 
         try {
-            // Create a temporary Think instance to validate the tool
-            const agent = new Think('temp');
-            await agent.validateTool(url);
+            await Think.validateTool(url);
 
             // If validation succeeds, add the tool
             const tool: SCPTool = {

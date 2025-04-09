@@ -8,6 +8,12 @@ interface RecentAgent {
   firstMessage?: string;
 }
 
+interface AgentConfig {
+  systemPrompt: string;
+  tools: string[];
+  openaiApiKey?: string;
+}
+
 interface ChatHeaderProps {
   agentName: string;
   thinking: boolean;
@@ -17,6 +23,7 @@ interface ChatHeaderProps {
   onNewChat?: () => void;
   onSelectAgent?: (agentId: string) => void;
   currentAgentId?: string | null;
+  agentConfig?: AgentConfig;
 }
 
 export default function ChatHeader({ 
@@ -27,10 +34,12 @@ export default function ChatHeader({
   onBack,
   onNewChat,
   onSelectAgent,
-  currentAgentId 
+  currentAgentId,
+  agentConfig
 }: ChatHeaderProps) {
   const [isLeftPaneOpen, setIsLeftPaneOpen] = useState(false);
   const [recentAgents, setRecentAgents] = useState<RecentAgent[]>([]);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('recentAgents');
@@ -66,19 +75,34 @@ export default function ChatHeader({
             </h1>
           </div>
         </div>
-        {selectedTool && (
-          <button
-            onClick={onCloseDetails}
-            className="px-3 py-1.5 rounded-full text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-          >
-            <span className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <div className="flex items-center gap-2">
+          {agentConfig && (
+            <button
+              onClick={() => setIsConfigOpen(!isConfigOpen)}
+              className="p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              title="View Configuration"
+              aria-label="View Configuration"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Close Details
-            </span>
-          </button>
-        )}
+            </button>
+          )}
+          {selectedTool && (
+            <button
+              onClick={onCloseDetails}
+              className="px-3 py-1.5 rounded-full text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+            >
+              <span className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close Details
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Left Pane */}
@@ -133,11 +157,63 @@ export default function ChatHeader({
         </div>
       </div>
 
-      {/* Overlay */}
+      {/* Configuration Sidebar */}
+      {isConfigOpen && agentConfig && (
+        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-lg border border-gray-200 p-4 z-50">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">System Prompt</h3>
+              <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                {agentConfig.systemPrompt || <span className="text-gray-400 italic">No system prompt</span>}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Tools</h3>
+              <div className="text-sm text-gray-600">
+                {agentConfig.tools && agentConfig.tools.length > 0 ? (
+                  <div className="space-y-1">
+                    {agentConfig.tools.map((tool, index) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-2 break-all">
+                        {tool}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-gray-400 italic">No tools configured</div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">OpenAI API Key</h3>
+              <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                {agentConfig.openaiApiKey ? (
+                  <div className="flex items-center space-x-2">
+                    <span>••••••••</span>
+                    <span className="text-green-600 text-xs">(Custom key provided)</span>
+                  </div>
+                ) : (
+                  <span className="text-gray-400 italic">Using default API key</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overlays */}
       {isLeftPaneOpen && (
         <div
           className="fixed inset-0 bg-black opacity-25 z-20"
           onClick={() => setIsLeftPaneOpen(false)}
+        />
+      )}
+      
+      {isConfigOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-25 z-20"
+          onClick={() => setIsConfigOpen(false)}
         />
       )}
     </div>

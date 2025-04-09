@@ -1,7 +1,6 @@
-import type OpenAI from "openai";
 import axios from "axios";
+import OpenAI from "openai";
 import { JSONSchema } from "openai/lib/jsonschema";
-import { SCPTool } from ".";
 
 export interface IToolExecutor {
     execute: (args: any) => Promise<string>;
@@ -20,26 +19,31 @@ export type AgentEventHandler = (agent: Agent, message: IChatMessage) => void;
 export interface ISerialisedAgent {
     id: string;
     name: string;
-    tools: SCPTool[];
+    tools: { title: string; url: string }[];
     messages: IChatMessage[];
     systemPrompt?: string;
+    openaiApiKey?: string;
 }
 
 export class Agent {
     id: string;
     name: string;
-    tools: SCPTool[];
+    tools: { title: string; url: string }[];
     messages: IChatMessage[];
     systemPrompt?: string;
     private openaiClient: OpenAI;
     private updateHandler: AgentEventHandler;
+    openaiApiKey?: string;
 
     constructor(
         serialisedAgent: ISerialisedAgent,
-        openaiClient: OpenAI,
+        defaultOpenAIClient: OpenAI,
         updateHandler: AgentEventHandler
     ) {
-        this.openaiClient = openaiClient;
+        this.openaiApiKey = serialisedAgent.openaiApiKey;
+        this.openaiClient = this.openaiApiKey 
+            ? new OpenAI({ apiKey: this.openaiApiKey })
+            : defaultOpenAIClient;
         this.updateHandler = updateHandler;
 
         this.id = serialisedAgent.id;
@@ -49,6 +53,9 @@ export class Agent {
         this.systemPrompt = serialisedAgent.systemPrompt;
     }
 
+    get apiKey() {
+        return this.openaiApiKey;
+    }
 
     private notifyUpdate(message: IChatMessage) {
         this.updateHandler(this, message);
@@ -113,8 +120,8 @@ export class Agent {
             type: 'function' as const,
             function: {
                 name: normaliseToolName(tool.title),
-                description: tool.description,
-                parameters: tool as any
+                description: "",
+                parameters: {}
             }
         }));
 
@@ -211,7 +218,6 @@ export class Agent {
         );
     }
 }
-
 
 function normaliseToolName(name: string): string {
     return name.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase();
