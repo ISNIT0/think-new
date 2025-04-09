@@ -1,5 +1,5 @@
 import React from 'react';
-import { Message, ToolCall } from '../api';
+import { Message, ToolCall } from '@think-new/sdk';
 import Avatar from './Avatar';
 
 interface ChatMessageProps {

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../api'
+import { Think, ThinkValidationError, ThinkAPIError } from '@think-new/sdk'
 import { SAMPLE_TOOLS } from '../types/tool'
-import { SCPTool, validateSCPEndpoint } from '../lib/scp'
 
 interface RecentAgent {
     id: string;
@@ -10,12 +9,10 @@ interface RecentAgent {
     timestamp: number;
 }
 
-interface ProblemDetails {
-    type?: string;
+interface SCPTool {
+    url: string;
     title: string;
-    status: number;
-    detail: string;
-    validation_errors?: any[];
+    description?: string;
 }
 
 export default function CreateAgent() {
@@ -41,18 +38,15 @@ export default function CreateAgent() {
         setError(null);
 
         try {
-            // Format tools to match backend schema
-            const formattedTools = selectedTools.map(tool => ({
-                url: tool.url,
-                title: tool.title,
-                description: tool.description
-            }));
-
-            const { agentId } = await api.createAgent({
-                name,
+            // Create a new Think instance
+            const agent = new Think(name, {
                 systemPrompt,
-                tools: formattedTools
+                tools: selectedTools.map(t => t.url),
+                baseUrl: import.meta.env.VITE_API_URL
             });
+
+            // Create the agent on the server
+            const agentId = await agent.create();
 
             // Add to recent agents
             const newAgent = { id: agentId, name, timestamp: Date.now() };
@@ -61,19 +55,15 @@ export default function CreateAgent() {
 
             // Navigate to chat
             navigate(`/agent/${agentId}`);
-        } catch (error: any) {
+        } catch (error) {
             console.error('Failed to create agent:', error);
 
-            // Handle RFC 7807 Problem Details format
-            if (error.response?.data) {
-                const problem: ProblemDetails = error.response.data;
-                if (problem.validation_errors) {
-                    setError(`Validation error: ${problem.detail}`);
-                } else {
-                    setError(problem.detail || problem.title);
-                }
+            if (error instanceof ThinkValidationError) {
+                setError(`Validation error: ${error.message}`);
+            } else if (error instanceof ThinkAPIError) {
+                setError(error.message);
             } else {
-                setError(error.message || 'Failed to create agent');
+                setError((error as Error).message || 'Failed to create agent');
             }
         }
     };
@@ -97,23 +87,31 @@ export default function CreateAgent() {
         setValidationError(null);
 
         try {
-            const result = await validateSCPEndpoint(url);
+            // Create a temporary Think instance to validate the tool
+            const agent = new Think('temp');
+            await agent.validateTool(url);
 
-            if (result.isValid && result.discovery) {
-                const discovery = result.discovery as SCPTool;
-                setSelectedTools(prev => {
-                    // toggle
-                    if (prev.some(t => t.url === discovery.url)) {
-                        return prev.filter(t => t.url !== discovery.url);
-                    }
-                    return [...prev, discovery];
-                });
-                setScpUrl('');
-            } else {
-                setValidationError(result.error?.message || 'Invalid SCP endpoint');
-            }
+            // If validation succeeds, add the tool
+            const tool: SCPTool = {
+                url,
+                title: url.split('/').pop() || url, // Use the last part of the URL as title if not provided
+                description: 'SCP Tool' // Default description
+            };
+
+            setSelectedTools(prev => {
+                // toggle
+                if (prev.some(t => t.url === tool.url)) {
+                    return prev.filter(t => t.url !== tool.url);
+                }
+                return [...prev, tool];
+            });
+            setScpUrl('');
         } catch (error) {
-            setValidationError('Failed to validate SCP endpoint');
+            if (error instanceof ThinkValidationError) {
+                setValidationError(error.message);
+            } else {
+                setValidationError('Failed to validate SCP endpoint');
+            }
         } finally {
             setValidating(false);
         }

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.3",
+    "@think-new/sdk": "link:../sdk",
     "@types/node": "^22.14.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -30,5 +31,10 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@think-new/sdk": "link:../sdk"
+    }
   }
 }

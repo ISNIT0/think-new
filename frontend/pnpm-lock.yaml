@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@think-new/sdk': link:../sdk
+
 importers:
 
   .:
@@ -11,6 +14,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.3
         version: 4.1.3(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.2))
+      '@think-new/sdk':
+        specifier: link:../sdk
+        version: link:../sdk
       '@types/node':
         specifier: ^22.14.0
         version: 22.14.0
