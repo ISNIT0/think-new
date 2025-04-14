@@ -23,12 +23,6 @@ interface ToolData {
     result?: string;
 }
 
-interface AgentConfig {
-    systemPrompt: string;
-    tools: string[];
-    openaiApiKey?: string;
-}
-
 interface AgentChatProps {
     agentId?: string;
     onClose?: () => void;

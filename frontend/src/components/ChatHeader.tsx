@@ -31,7 +31,6 @@ export default function ChatHeader({
   thinking, 
   selectedTool, 
   onCloseDetails, 
-  onBack,
   onNewChat,
   onSelectAgent,
   currentAgentId,
