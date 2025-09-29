@@ -148,7 +148,7 @@ export class Agent {
         let assistantMessage: IChatMessage;
         try {
             const ret = await this.openaiClient.chat.completions.create({
-                model: "gpt-5-nano",
+                model: "gpt-5-mini",
                 messages: [
                     {
                         role: "system",
